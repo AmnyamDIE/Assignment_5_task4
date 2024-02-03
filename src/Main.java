@@ -1,84 +1,77 @@
 import java.util.ArrayList;
-import java.util.List;
 
 class Edition {
-    private String title;
-    private int yearOfRelease;
+    private String name;
+    private String author;
+    private int yearOfPublication;
     private Department department;
 
-    public Edition(String title, int yearOfRelease) {
-        this.title = title;
-        this.yearOfRelease = yearOfRelease;
-    }
-
-    public Department getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public int getYearOfRelease() {
-        return yearOfRelease;
-    }
-}
-
-class Department {
-    private String name;
-    private Library library;
-    private List<Edition> editions;
-
-    public Department(String name) {
+    public Edition(String name, String author, int yearOfPublication) {
         this.name = name;
-        this.editions = new ArrayList<>();
-    }
-
-    public Library getLibrary() {
-        return library;
-    }
-
-    public void setLibrary(Library library) {
-        this.library = library;
-    }
-
-    public List<Edition> getEditions() {
-        return editions;
-    }
-
-    public void addEdition(Edition edition) {
-        editions.add(edition);
-        edition.setDepartment(this);
-    }
-
-    public void removeEdition(Edition edition) {
-        editions.remove(edition);
-        edition.setDepartment(null);
+        this.author = author;
+        this.yearOfPublication = yearOfPublication;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getNumberOfEditions() {
-        return editions.size();
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    public int getYearOfPublication() {
+        return 0;
+    }
+
+    public Department getDepartment() {
+        return null;
+    }
+}
+
+class Department {
+    private String genre;
+    private ArrayList<Edition> editions = new ArrayList<>();
+    private Library library;
+
+    public Department(String genre) {
+        this.genre = genre;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public ArrayList<Edition> getEditions() {
+        return editions;
+    }
+
+    public void setLibrary(Library library) {
+        this.library = library;
+    }
+
+    public void addEdition(Edition edition) {
+        editions.add(edition);
+        edition.setDepartment(this);
+        library.updateNumberOfEditions();
+    }
+
+    public void removeEdition(Edition edition) {
+        editions.remove(edition);
+        edition.setDepartment(null);
+        library.updateNumberOfEditions();
     }
 }
 
 class Library {
     private String name;
-    private List<Department> departments;
+    private ArrayList<Department> departments = new ArrayList<>();
 
     public Library(String name) {
         this.name = name;
-        this.departments = new ArrayList<>();
     }
 
-    public List<Department> getDepartments() {
+    public ArrayList<Department> getDepartments() {
         return departments;
     }
 
@@ -92,75 +85,60 @@ class Library {
         department.setLibrary(null);
     }
 
-    public List<Edition> searchPublicationsByYear(int year) {
-        List<Edition> foundPublications = new ArrayList<>();
+    public void updateNumberOfEditions() {
+    }
+
+    public ArrayList<Edition> searchPublicationsByYear(int year) {
+        ArrayList<Edition> foundPublications = new ArrayList<>();
         for (Department department : departments) {
             for (Edition edition : department.getEditions()) {
-                if (edition.getYearOfRelease() == year) {
+                if (edition.getYearOfPublication() == year) {
                     foundPublications.add(edition);
                 }
             }
         }
         return foundPublications;
     }
-
-    public String getName() {
-        return name;
-    }
 }
 
 public class Main {
     public static void main(String[] args) {
-        Library library = new Library("Central Library");
-
-        Department department1 = new Department("Science");
-        Department department2 = new Department("History");
-        Department department3 = new Department("Fiction");
-
-        Edition publication1 = new Edition("Book1", 2020);
-        Edition publication2 = new Edition("Book2", 2019);
-        Edition publication3 = new Edition("Book3", 2020);
+        Library library = new Library("Main Library");
+        Department department1 = new Department("Science Fiction");
+        Department department2 = new Department("Fantasy");
+        Edition edition1 = new Edition("Book 1", "Author 1", 2013);
+        Edition edition2 = new Edition("Book 2", "Author 2", 2013);
+        Edition edition3 = new Edition("Book 3", "Author 3", 2023);
 
         library.addDepartment(department1);
         library.addDepartment(department2);
-        library.addDepartment(department3);
+        department1.addEdition(edition1);
+        department1.addEdition(edition2);
+        department2.addEdition(edition3);
 
-        department1.addEdition(publication1);
-        department1.addEdition(publication2);
+        displayDepartmentInfo(library);
 
-        department2.addEdition(publication3);
-
-        department3.addEdition(new Edition("Novel1", 2018));
-
-        // Display information
-        displayDepartmentPublications(library);
-
-        // Remove the second department
         library.removeDepartment(department2);
 
-        // Display information again
-        System.out.println("\nAfter removing the 'History' department:");
-        displayDepartmentPublications(library);
+        displayDepartmentInfo(library);
 
-        // Search for publications by year
-        int searchYear = 2020;
-        List<Edition> foundPublications = library.searchPublicationsByYear(searchYear);
+        int searchYear = 2013;
+        ArrayList<Edition> foundPublications = library.searchPublicationsByYear(searchYear);
 
-        System.out.println("\nPublications released in " + searchYear + ":");
-        for (Edition edition : foundPublications) {
-            System.out.println("Title: " + edition.getTitle() + ", Department: " + edition.getDepartment().getName());
-        }
+        displayFoundPublications(foundPublications);
     }
 
-    private static void displayDepartmentPublications(Library library) {
-        System.out.println("Library: " + library.getName());
+    private static void displayDepartmentInfo(Library library) {
         for (Department department : library.getDepartments()) {
-            System.out.println("\nDepartment: " + department.getName());
-            System.out.println("Number of Publications: " + department.getNumberOfEditions());
-            System.out.println("Publications:");
-            for (Edition edition : department.getEditions()) {
-                System.out.println("Title: " + edition.getTitle() + ", Year: " + edition.getYearOfRelease());
-            }
+            System.out.println("Department: " + department.getGenre());
+            System.out.println("Number of Publications: " + department.getEditions().size());
+        }
+        System.out.println("------");
+    }
+    private static void displayFoundPublications(ArrayList<Edition> foundPublications) {
+        for (Edition publication : foundPublications) {
+            System.out.println("Publication: " + publication.getName());
+            System.out.println("Department: " + publication.getDepartment().getGenre());
         }
     }
 }
